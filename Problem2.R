@@ -56,4 +56,77 @@ qqline(residuals$vals)
 
 # Sign-Test
 
+# Number of sign changes: Binom(N − 1, 1/2).
+sign_changes <- sum(diff(sign(residuals$vals)) != 0)
+# The total number of comparisons
+N <- length(residuals$vals) - 1
+# Expected number of sign changes for white noise
+expected_sign_changes <- N / 2
+# Standard deviation for the number of sign changes under the null hypothesis
+std_dev <- sqrt(N / 4)
+# Calculate z-score
+z_score <- (sign_changes - expected_sign_changes) / std_dev
+# Assuming a normal approximation, calculate the p-value
+p_value <- 2 * pnorm(-abs(z_score))
+# Print the results
+cat("Number of sign changes:", sign_changes, "\n")
+cat("Expected number of sign changes:", expected_sign_changes, "\n")
+cat("Standard deviation:", std_dev, "\n")
+cat("Z-score:", z_score, "\n")
+cat("P-value:", p_value, "\n")
+
+p <- 0.5  # Probability of success
+# Generate binomial outcomes
+binom_outcomes <- rbinom(10000, N, p)
+
+# Plot the binomial outcomes (histogram)
+binom_plot <- ggplot(data = data.frame(binom_outcomes), aes(x = binom_outcomes)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1, color = "black", fill = "blue") +
+  labs(title = "Binomial Outcomes and Normal Approximation",
+       x = "Number of Sign Changes",
+       y = "Density")
+
+# Calculate parameters for the normal approximation
+mean <- N * p
+std_dev <- sqrt(N * p * (1 - p))
+
+# Add a normal density curve
+binom_plot <- binom_plot + 
+  stat_function(fun = dnorm, args = list(mean = mean, sd = std_dev), color = "red", size = 1)
+
+# Display the plot
+print(binom_plot)
+
+# 2.2
+## predict function k steps
+Y_pred <- rep(0, 12) 
+predictk <- function(t, k) {
+  Xt_minus_1 <- data$Xt[t]
+  if (t + k - 1 > 36) {
+    Xt_minus_1 <- Y_pred[k]
+  }
+  pred <- -(phi1 * Xt_minus_1 + Phi1 * data$Xt[t + k - 12] + phi1 * Phi1 * data$Xt[t + k - 13]) 
+  return(pred)
+}
+
+for (k in 1:12) {
+  print(paste("k = ", k))
+  Y_pred[k] <- exp(predictk(36, k) + mu)
+}
+print(Y_pred)
+Y_pred_idx <- seq.int(from = 37, to = 37 + 12 - 1)
+Yt_pred <- data.frame(index = Y_pred_idx, Yt = Y_pred)
+plot <- ggplot(data, aes(x = index, y = Yt)) + geom_line() +
+  geom_point(color = "blue") + # Plot the data frame points in blue
+  geom_point(data = Yt_pred, aes(x = index, y = Yt), color = "red") + 
+  geom_line(data = Yt_pred, aes(x = index, y = Yt), color = "black") +
+  labs(title = "Yt and 12-month ahead predictions",
+       x = "Month index",
+       y = "Power - Yt")
+print(plot)
+
+
+
+
+
 
