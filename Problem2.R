@@ -125,8 +125,32 @@ plot <- ggplot(data, aes(x = index, y = Yt)) + geom_line() +
        y = "Power - Yt")
 print(plot)
 
+# 2.3 
 
+sigma_eps_2 <- 0.22^2
+var_pred_err <- rep(0, 12)
 
+for (k in 1:12) {
+  # compute variance 
+  phi_sum <- 1
+  for (i in 1:k){
+    phi_sum <- phi_sum + phi1^(2*(k - i))
+  }
+  var_pred_err[k] <- exp(phi_sum*sigma_eps_2 + mu)
+}
 
+print(var_pred_err)
+Yt_pred$lower <- Yt_pred$Yt - qnorm(0.975)*sqrt(var_pred_err)
+Yt_pred$upper <- Yt_pred$Yt + qnorm(0.975)*sqrt(var_pred_err)
+
+plot <- ggplot(Yt_pred, aes(x = index, y = Yt)) +
+  geom_point(data = Yt_pred, aes(x = index, y = Yt), color = "red") + 
+  geom_line(data = Yt_pred, aes(x = index, y = Yt), color = "black") +
+  geom_ribbon(data = Yt_pred, aes(x = index, ymin = lower, ymax = upper), alpha=0.2, fill = "red") +
+  labs(title = "Yt and 12-month ahead predictions",
+       x = "Month index",
+       y = "Power - Yt")
+  
+print(plot)
 
 
