@@ -100,6 +100,7 @@ print(binom_plot)
 # 2.2
 ## predict function k steps
 Y_pred <- rep(0, 12) 
+X_pred <- rep(0, 12)
 predictk <- function(t, k) {
   Xt_minus_1 <- data$Xt[t]
   if (t + k - 1 > 36) {
@@ -111,13 +112,16 @@ predictk <- function(t, k) {
 
 for (k in 1:12) {
   print(paste("k = ", k))
-  Y_pred[k] <- exp(predictk(36, k) + mu)
+  X_pred[k] <- predictk(36, k)
+  Y_pred[k] <- exp(X_pred[k] + mu)
 }
-print(Y_pred)
 Y_pred_idx <- seq.int(from = 37, to = 37 + 12 - 1)
 Yt_pred <- data.frame(index = Y_pred_idx, Yt = Y_pred)
-plot <- ggplot(data, aes(x = index, y = Yt)) + geom_line() +
-  geom_point(color = "blue") + # Plot the data frame points in blue
+bridge <- data.frame(index = 36, Yt = data$Yt[36])
+bridge <- rbind(bridge, head(Yt_pred, 1))
+plot <- ggplot(data, aes(x = index, y = Yt)) +
+  geom_point(color = "blue") + 
+  geom_line() + geom_path(data = bridge, aes(x = index, y = Yt)) +
   geom_point(data = Yt_pred, aes(x = index, y = Yt), color = "red") + 
   geom_line(data = Yt_pred, aes(x = index, y = Yt), color = "black") +
   labs(title = "Yt and 12-month ahead predictions",
@@ -142,15 +146,15 @@ for (k in 1:12) {
 print(var_pred_err)
 Yt_pred$lower <- Yt_pred$Yt - qnorm(0.975)*sqrt(var_pred_err)
 Yt_pred$upper <- Yt_pred$Yt + qnorm(0.975)*sqrt(var_pred_err)
-
-plot <- ggplot(Yt_pred, aes(x = index, y = Yt)) +
+plot <- ggplot(data, aes(x = index, y = Yt)) +
+  geom_point(color = "blue") + 
+  geom_line() + geom_path(data = bridge, aes(x = index, y = Yt)) +
   geom_point(data = Yt_pred, aes(x = index, y = Yt), color = "red") + 
   geom_line(data = Yt_pred, aes(x = index, y = Yt), color = "black") +
   geom_ribbon(data = Yt_pred, aes(x = index, ymin = lower, ymax = upper), alpha=0.2, fill = "red") +
   labs(title = "Yt and 12-month ahead predictions",
        x = "Month index",
        y = "Power - Yt")
-  
 print(plot)
 
 
