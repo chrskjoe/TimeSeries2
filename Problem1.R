@@ -1,3 +1,4 @@
+library(stats)
 # Function for plot
 plotit <- function(x){
   layout(rbind(1,2:3))
@@ -22,7 +23,21 @@ x <- numeric(n)
 
 #1.4
 set.seed(1)
-plotit( arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
+plotit(arima.sim(model = list(ar = c(phi1, phi2)), n = n))
+# Define AR coefficients in the order of AR(1) to AR(p)
+ar_coefficients <- c(-phi1, -phi2)
+# Compute the theoretical autocorrelation function for an AR(2) process
+acf_values <- ARMAacf(ar = ar_coefficients, ma = numeric(0), lag.max = 30)
+acf_df <- data.frame(Lag = 0:30, ACF = acf_values)
+# Plot the autocorrelation function
+p <- ggplot(acf_df, aes(x = Lag, y = ACF)) +
+  geom_bar(stat = "identity", color = "blue", fill = "blue") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Theoretical ACF of an AR(2) process",
+       x = "Lag",
+       y = "Autocorrelation")
+print(p)
+
 
 
 # 1.5
@@ -57,16 +72,16 @@ plotit <- function(x){
 
 set.seed(11)
 phi1 <- -0.2
-plotit( arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
+plotit(arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
 
 set.seed(12)
 phi1 <- 0.7
-plotit( arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
+plotit(arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
 
 set.seed(13)
 phi1 <- -0.8
-plotit( arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
+plotit(arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
 
 set.seed(14)
 phi1 <- -0.85
-plotit( arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
+plotit(arima.sim(model=list(ar=c(phi1,phi2)), n=n) )
